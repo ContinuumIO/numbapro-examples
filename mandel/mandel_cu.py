@@ -21,7 +21,7 @@ def mandel(tid, min_x, max_x, min_y, max_y, image, iters):
 
     c = complex(real, imag)
     z = 0.0j
-    color = 255
+    color = iters
     for i in range(iters):
         z = z * z + c
         if (z.real * z.real + z.imag * z.imag) >= 4:
@@ -52,7 +52,7 @@ def main():
         create_fractal(cu, -2.0, 1.0, -1.0, 1.0, d_image, 20)
         cu.wait()
         e = timer()
-    print(e - s)
+    print('time: %f' % (e - s,))
 #    print(image)
     imshow(image)
     show()

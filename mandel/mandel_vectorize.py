@@ -6,7 +6,7 @@ import numpy as np
 from timeit import default_timer as timer
 from pylab import imshow, jet, show, ion
 
-sig = 'uint8(uint32, f4, f4, f4, f4, uint32, uint32, uint32)'
+sig = 'uint8(uint32, f8, f8, f8, f8, uint32, uint32, uint32)'
 
 @vectorize([sig], target='gpu')
 def mandel(tid, min_x, max_x, min_y, max_y, width, height, iters):
@@ -26,12 +26,12 @@ def mandel(tid, min_x, max_x, min_y, max_y, width, height, iters):
         z = z * z + c
         if (z.real * z.real + z.imag * z.imag) >= 4:
             return i
-    return 255
+    return iters
 
 def create_fractal(min_x, max_x, min_y, max_y, width, height, iters):
     tids = np.arange(width * height, dtype=np.uint32)
-    return mandel(tids, np.float32(min_x), np.float32(max_x), np.float32(min_y),
-                  np.float32(max_y), np.uint32(height), np.uint32(width),
+    return mandel(tids, np.float64(min_x), np.float64(max_x), np.float64(min_y),
+                  np.float64(max_y), np.uint32(height), np.uint32(width),
                   np.uint32(iters))
 
 def main():
