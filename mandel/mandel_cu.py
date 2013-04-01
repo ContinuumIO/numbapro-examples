@@ -28,7 +28,7 @@ def mandel(tid, min_x, max_x, min_y, max_y, image, iters):
             color = i
             break
 
-    image[y, x] = i
+    image[y, x] = color
 
 def create_fractal(cu, min_x, max_x, min_y, max_y, image, iters):
     height, width = image.shape
