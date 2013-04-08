@@ -1,7 +1,6 @@
 import numpy as np
 from math import sqrt, exp
 from timeit import default_timer as timer
-#from matplotlib import pyplot
 
 def step(dt, prices, c0, c1, noises):
     return prices * np.exp(c0 * dt + c1 * noises)

@@ -9,7 +9,7 @@ from cuda_helper import MM
 
 @jit('void(double[:], double[:], double, double, double, double[:])',
      target='gpu')
-def cu_monte_carlo_pricer(last, paths, dt, c0, c1, normdist):
+def cu_step(last, paths, dt, c0, c1, normdist):
     i = cuda.grid(1)
     if i >= paths.shape[0]:
         return
@@ -35,19 +35,19 @@ def monte_carlo_pricer(paths, dt, interest, volatility):
 
     # Configure the kernel
     # Similar to CUDA-C: cu_monte_carlo_pricer<<<gridsz, blksz, 0, stream>>>
-    mcp = cu_monte_carlo_pricer[gridsz, blksz, stream]
+    step = cu_step[gridsz, blksz, stream]
     
     d_last = cuda.to_device(paths[:, 0], to=mm.get())
     for j in range(1, paths.shape[1]):
         prng.normal(d_normdist, mean=0, sigma=1)
         d_paths = cuda.to_device(paths[:, j], stream=stream, to=mm.get())
-        mcp(d_last, d_paths, dt, c0, c1, d_normdist)
+        step(d_last, d_paths, dt, c0, c1, d_normdist)
         d_paths.copy_to_host(paths[:, j], stream=stream)
-        mm.free(d_last)
+        mm.free(d_last, stream=stream)
         d_last = d_paths
 
     stream.synchronize()
 
 if __name__ == '__main__':
     from driver import driver
-    driver(monte_carlo_pricer)
+    driver(monte_carlo_pricer, pinned=True)

@@ -26,6 +26,6 @@ class MM(object):
 
     def free(self, gpumem, stream=0):
         evnt = self.events[gpumem]
-        evnt.record()
+        evnt.record(stream=stream)
         self.freelist.append(gpumem)
 
