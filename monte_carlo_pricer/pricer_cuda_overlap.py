@@ -55,14 +55,15 @@ def monte_carlo_pricer(paths, dt, interest, volatility):
     steplist = [cu_step[gridsz, blksz, strm]
                for gridsz, strm in zip(gridszlist, strmlist)]
 
-    d_lastlist = [cuda.to_device(paths[s:e, 0], to=mm.get())
-                  for s, e in partitions]
+    d_lastlist = [cuda.to_device(paths[s:e, 0], to=mm.get(stream=strm))
+                  for (s, e), strm in zip(partitions, strmlist)]
 
     for j in xrange(1, paths.shape[1]):
         for prng, d_norm in zip(prnglist, d_normlist):
             prng.normal(d_norm, mean=0, sigma=1)
 
-        d_pathslist = [cuda.to_device(paths[s:e, j], stream=strm, to=mm.get())
+        d_pathslist = [cuda.to_device(paths[s:e, j], stream=strm,
+                                      to=mm.get(stream=strm))
                        for (s, e), strm in zip(partitions, strmlist)]
 
         for step, args in zip(steplist, zip(d_lastlist, d_pathslist, d_normlist)):

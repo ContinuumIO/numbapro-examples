@@ -9,4 +9,5 @@
 
 All `pricer_*.py` scripts are runnable.
 
-    Note: `pricer_cuda_overlap.py` uses features in the upcoming NumbaPro 0.11 release.
+    **Note**: `pricer_cuda_overlap.py` uses features in the upcoming 
+              NumbaPro 0.11 release.

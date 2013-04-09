@@ -15,13 +15,13 @@ class MM(object):
             self.freelist.append(gpumem)
             self.events[gpumem] = cuda.event(timing=False)
 
-    def get(self):
+    def get(self, stream=0):
         assert self.freelist
         gpumem = self.freelist.popleft()
         evnt = self.events[gpumem]
         if not evnt.query(): # not ready?
             # querying is faster then waiting
-            evnt.wait() # future works must wait
+            evnt.wait(stream=stream) # future works must wait
         return gpumem
 
     def free(self, gpumem, stream=0):
