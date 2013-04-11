@@ -1,6 +1,11 @@
 from collections import deque
 from numbapro import cuda
 
+if not hasattr(cuda, 'event'):
+    raise Exception('All CUDA examples in this directory use features in the '
+                    'upcoming NumbaPro 0.11 which is scheduled for release '
+                    'on the week of April 14.')
+
 class MM(object):
     """Memory Manager
     
