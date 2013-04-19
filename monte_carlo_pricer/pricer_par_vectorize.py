@@ -1,11 +1,6 @@
 import numpy as np
 import math
-
-import numbapro
-from numbapro import cuda, vectorize
-from numbapro.cudalib import curand
-from cuda_helper import MM
-
+from numbapro import vectorize
 
 @vectorize(['f8(f8, f8, f8, f8, f8)'], target='parallel')
 def step(last, dt, c0, c1, noise):
