@@ -1,7 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import
 import sys
-from numbapro import CU
+try:
+    from numbapro import CU
+except ImportError:
+    raise Exception('''
+As of NumbaPro 0.12.0, the experimental CU API was removed.  We will be
+providing a better API for building parallel computation through composition
+of high-level construct.
+    ''')
 from contextlib import closing
 import numpy as np
 from timeit import default_timer as timer
