@@ -2,11 +2,13 @@ from timeit import default_timer as timer
 import math
 import numpy as np
 import pylab
-from numbapro import cuda
+from numbapro import cuda, cudadrv
+# For machine with multiple devices
+cuda.select_device(0)
 
 @cuda.jit('float32(float32, float32)', device=True)
 def core(a, b):
-    return (a + b) #** 2 / 2
+    return a + b
 
 @cuda.jit('void(float32[:], float32[:], float32[:])')
 def vec_add(a, b, c):
@@ -137,13 +139,18 @@ def vec_add_ilp_x8(a, b, c):
 def time_this(kernel, gridsz, blocksz, args):
     timings = []
     cuda.synchronize()
-    for i in range(10): # best of 10
-        ts = timer()
-        kernel[gridsz, blocksz](*args)
-        cuda.synchronize()
-        te = timer()
-        timings.append(te - ts)
-    return sum(timings) / len(timings)
+    try:
+        for i in range(10): # best of 10
+            ts = timer()
+            kernel[gridsz, blocksz](*args)
+            cuda.synchronize()
+            te = timer()    
+            timings.append(te - ts)
+    except cudadrv.error.CudaDriverError, e:
+        print 'exc suppressed', e
+        return -1
+    else:
+        return sum(timings) / len(timings)
 
 def ceil_to_nearest(n, m):
     return int(math.ceil(n / m) * m)
@@ -161,7 +168,10 @@ def main():
     ilpx4 = []
     ilpx8 = []
 
-    approx_data_size = 10 * 2**20
+    # For OSX 10.8 where the GPU is used for graphic as well,
+    # increasing the following to 10 * 2 ** 20 seems to be necessary to
+    # produce consistent result.
+    approx_data_size = 1.5 * 2**20
 
     for multiplier in range(1, maxtpb // warpsize + 1):
         blksz = warpsize * multiplier
@@ -183,29 +193,34 @@ def main():
         dC = cuda.device_array_like(A)
         basetime = time_this(vec_add, gridsz, blksz, (dA, dB, dC))
         expected_result = dC.copy_to_host()
-        baseline.append(N / basetime)
+        if basetime > 0:
+            baseline.append(N / basetime)
         
 
         dC = cuda.device_array_like(A)
         x2time = time_this(vec_add_ilp_x2, gridsz//2, blksz, (dA, dB, dC))
         assert np.allclose(expected_result, dC.copy_to_host())
-        ilpx2.append(N / x2time)
+        if x2time > 0:
+            ilpx2.append(N / x2time)
 
         dC = cuda.device_array_like(A)
         x4time = time_this(vec_add_ilp_x4, gridsz//4, blksz, (dA, dB, dC))
         assert np.allclose(expected_result, dC.copy_to_host())
-        ilpx4.append(N / x4time)
+        if x4time > 0:
+            ilpx4.append(N / x4time)
 
         dC = cuda.device_array_like(A)
         x8time = time_this(vec_add_ilp_x8, gridsz//8, blksz, (dA, dB, dC))
         assert np.allclose(expected_result, dC.copy_to_host())
-        ilpx8.append(N / x8time)
+        if x8time > 0:
+            ilpx8.append(N / x8time)
 
-    pylab.plot(vary_warpsize, baseline, label='baseline')
-    pylab.plot(vary_warpsize, ilpx2, label='ILP2')
-    pylab.plot(vary_warpsize, ilpx4, label='ILP4')
-    pylab.plot(vary_warpsize, ilpx8, label='ILP8')
+    pylab.plot(vary_warpsize[:len(baseline)], baseline, label='baseline')
+    pylab.plot(vary_warpsize[:len(ilpx2)], ilpx2, label='ILP2')
+    pylab.plot(vary_warpsize[:len(ilpx4)], ilpx4, label='ILP4')
+    pylab.plot(vary_warpsize[:len(ilpx8)], ilpx8, label='ILP8')
     pylab.legend(loc=4)
+    pylab.title(cuda.get_current_device().name)
     pylab.xlabel('block size')
     pylab.ylabel('float per second')
     pylab.show()
