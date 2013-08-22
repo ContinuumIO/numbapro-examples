@@ -41,6 +41,7 @@ with cuda.pinned(src, dst):
     copy_kernel(d_src, out=d_dst, stream=stream)
 
     d_dst.copy_to_host(dst, stream=stream)
+    stream.synchronize()
     te = timer()
     print 'pinned', te - ts
 
