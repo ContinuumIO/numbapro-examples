@@ -1,3 +1,31 @@
+'''
+This script executes 2D FFT convolution on images in grayscale.
+
+Usage:
+
+Run without argument will use builtin Lena image:
+
+    python fftconvolve.py
+    
+Or, specify an image to use
+
+    python fftconvolve.py myimage.jpg
+    python fftconvolve.py myimage.png
+
+
+= Getting The Requirements =
+
+For Conda user, run the following to ensure the dependencies are fulfilled:
+
+    conda install scipy matplotlib
+    
+You may need to install PIL from pip.
+
+    conda install pip
+    pip install PIL
+
+'''
+
 import sys
 import numpy as np
 from scipy.signal import fftconvolve
@@ -48,28 +76,52 @@ def main():
     print('CPU: %.2fs' % (te - ts))
 
     # GPU
-    threadperblock = 32, 16
+    threadperblock = 32, 8
     blockpergrid = best_grid_size(tuple(reversed(image.shape)), threadperblock)
     print('kernel config: %s x %s' % (blockpergrid, threadperblock))
 
+    # Trigger initialization the cuFFT system.
+    # This takes significant time for small dataset.
+    # We should not be including the time wasted here
+    cufft.FFTPlan(shape=image.shape, itype=np.complex64, otype=np.complex64)
+
+    # Start GPU timer
     ts = timer()
     image_complex = image.astype(np.complex64)
     response_complex = response.astype(np.complex64)
 
-    stream = cuda.stream()
+    stream1 = cuda.stream()
+    stream2 = cuda.stream()
 
-    d_image_complex = cuda.to_device(image_complex, stream=stream)
-    d_response_complex = cuda.to_device(response_complex, stream=stream)
+    fftplan1 = cufft.FFTPlan(shape=image.shape, itype=np.complex64,
+                            otype=np.complex64, stream=stream1)
+    fftplan2 = cufft.FFTPlan(shape=image.shape, itype=np.complex64,
+                        otype=np.complex64, stream=stream2)
 
-    cufft.fft_inplace(d_image_complex, stream=stream)
-    cufft.fft_inplace(d_response_complex, stream=stream)
-    mult_inplace[blockpergrid, threadperblock, stream](d_image_complex, d_response_complex)
-    cufft.ifft_inplace(d_image_complex, stream=stream)
-    cvimage_gpu = d_image_complex.copy_to_host().real / np.prod(image.shape)
+    # pagelock memory
+    with cuda.pinned(image_complex, response_complex):
+
+        # We can overlap the transfer of response_complex with the forward FFT
+        # on image_complex.
+        d_image_complex = cuda.to_device(image_complex, stream=stream1)
+        d_response_complex = cuda.to_device(response_complex, stream=stream2)
+
+        fftplan1.forward(d_image_complex, out=d_image_complex)
+        fftplan2.forward(d_response_complex, out=d_response_complex)
+        
+        stream2.synchronize()
+
+        mult_inplace[blockpergrid, threadperblock, stream1](d_image_complex,
+                                                            d_response_complex)
+        fftplan1.inverse(d_image_complex, out=d_image_complex)
+
+        # implicitly synchronizes the streams
+        cvimage_gpu = d_image_complex.copy_to_host().real / np.prod(image.shape)
 
     te = timer()
-    print('CPU: %.2fs' % (te - ts))
+    print('GPU: %.2fs' % (te - ts))
 
+    # Plot the results
     plt.subplot(1, 2, 1)
     plt.title('CPU')
     plt.imshow(cvimage_cpu, cmap=plt.cm.gray)
