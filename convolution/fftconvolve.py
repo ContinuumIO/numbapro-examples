@@ -10,8 +10,8 @@ from timeit import default_timer as timer
 @cuda.jit('void(complex64[:,:], complex64[:,:])')
 def mult_inplace(img, resp):
     i, j = cuda.grid(2)
-    if i < img.shape[0] and j < img.shape[1]:
-        img[i, j] *= resp[i, j]
+    if j < img.shape[0] and i < img.shape[1]:
+        img[j, i] *= resp[j, i]
 
 def best_grid_size(size, tpb):
     bpg = np.ceil(np.array(size, dtype=np.float) / tpb).astype(np.int).tolist()
@@ -49,7 +49,7 @@ def main():
 
     # GPU
     threadperblock = 32, 16
-    blockpergrid = best_grid_size(image.shape, threadperblock)
+    blockpergrid = best_grid_size(tuple(reversed(image.shape)), threadperblock)
     print('kernel config: %s x %s' % (blockpergrid, threadperblock))
 
     ts = timer()
