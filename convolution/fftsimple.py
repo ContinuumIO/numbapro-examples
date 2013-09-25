@@ -5,12 +5,12 @@ Usage:
 
 Run without argument will use builtin Lena image:
 
-    python fftconvolve.py
+    python fftsimple.py
     
 Or, specify an image to use
 
-    python fftconvolve.py myimage.jpg
-    python fftconvolve.py myimage.png
+    python fftsimple.py myimage.jpg
+    python fftsimple.py myimage.png
 
 
 = Getting The Requirements =
