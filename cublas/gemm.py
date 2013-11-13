@@ -6,25 +6,16 @@ Please refer to the documentation for details of how to use the gemm routine
 Note: cuBLAS uses Fortran layout
 '''
 
-from numbapro import jit, cuda
-from numba import float32
 import numbapro.cudalib.cublas as cublas
 import numpy as np
 from timeit import default_timer as timer
- 
-def generate_input(n):
-    import numpy as np
-    A = np.array(np.arange(n ** 2, dtype=np.float32).reshape(n,n), order='F')
-    B = np.array(np.arange(n) + 10, dtype=A.dtype, order='F')
-    return A, B
- 
+
 def main():
-   
+    # Prepare arrays for input
     N = 128
- 
-    A, B = generate_input(N)
+    A = np.array(np.arange(N ** 2, dtype=np.float32).reshape(N, N), order='F')
+    B = np.array(np.arange(N) + 10, dtype=A.dtype, order='F')
     D = np.zeros_like(A)
-    E = np.empty(A.shape)
 
     # NumPy
     start = timer()
@@ -41,11 +32,10 @@ def main():
     cuda_time = timer() - start
 
     print("CUBLAS took %f seconds" % cuda_time)
-    diff = np.abs(D-E)
+    diff = np.abs(D - E)
     print("Maximum error %f" % np.max(diff))
 
 
- 
 if __name__ == '__main__':
    main()
 
