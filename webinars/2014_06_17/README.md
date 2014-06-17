@@ -13,6 +13,7 @@ To view the ipython notebook in slidemode.
 1. Go to http://slideviewer.herokuapp.com 
 2. Copy this link: https://raw.githubusercontent.com/ContinuumIO/numbapro-examples/master/webinars/2014_06_17/intro_to_gpu_python.ipynb
 3. Paste it on the input box
+4. Submit the form
 
 ## Running the Notebook on Your Machine
 
