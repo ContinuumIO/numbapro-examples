@@ -10,9 +10,9 @@ Wakari platform in an Amazon GPU instance.
 
 To view the ipython notebook in slidemode.
 
-1) Go to http://slideviewer.herokuapp.com 
-2) Copy this link: https://raw.githubusercontent.com/ContinuumIO/numbapro-examples/master/webinars/2014_06_17/intro_to_gpu_python.ipynb
-3) Paste it on the input box
+1. Go to http://slideviewer.herokuapp.com 
+2. Copy this link: https://raw.githubusercontent.com/ContinuumIO/numbapro-examples/master/webinars/2014_06_17/intro_to_gpu_python.ipynb
+3. Paste it on the input box
 
 ## Running the Notebook on Your Machine
 
@@ -21,17 +21,13 @@ you can run the webinar on your machine.
 
 ### Install requirements
 
-1) Download Anaconda: http://continuum.io/downloads
-2) Once Anaconda is installed, you will have access to ``conda`` in the terminal
-3) Install numbapro
+1. Download Anaconda: http://continuum.io/downloads
+2. Once Anaconda is installed, you will have access to ``conda`` in the terminal
+3. Install numbapro in terminal ``$ conda install accelerate``.  Details about Accelerate: https://store.continuum.io/cshop/accelerate/
+4. You should be able ``import numbapro`` in python now
+5. (Optional) Get ipython notebook: ``$ conda install ipython-notebook``
+6. Launch ``$ ipython notebook --pylab=inline`` in the directory containing the notebook.
 
-```bash
-$ conda install accelerate   # Commerical package containing numbapro
-```
-
-Details about Accelerate: https://store.continuum.io/cshop/accelerate/
-
-4) You should be able ``import numbapro`` now
 
 
 
