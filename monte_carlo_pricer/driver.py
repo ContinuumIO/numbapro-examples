@@ -29,6 +29,8 @@ def driver(pricer, pinned=False):
     print fmt % ('paid off', np.mean(PaidOff))
     optionprice = np.mean(PaidOff) * exp(-InterestRate * Maturity)
     print fmt % ('option price', optionprice)
+    print fmt % ('Paths ', NumPath)
+    print fmt % ('NumStep ', NumStep)
 
     print 'Performance'
     NumCompute = NumPath * NumStep
