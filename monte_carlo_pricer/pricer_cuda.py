@@ -27,7 +27,7 @@ def monte_carlo_pricer(paths, dt, interest, volatility):
     gridsz = int(math.ceil(float(n) / blksz))
 
     stream = cuda.stream()
-    prng = curand.PRNG(curand.PRNG.MRG32K3A, stream=stream)
+    prng = curand.PRNG(curand.PRNG.MRG32K3A)
 
     # Allocate device side array
     d_normdist = cuda.device_array(n, dtype=np.double, stream=stream)
