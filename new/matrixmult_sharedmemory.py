@@ -2,11 +2,13 @@
 # CUDA Matrix Multiplication with Shared Memory
 
 
-This is a sequel to the [CUDA Matrix Multiplication](matrixmult_intro.html)
-example.
+This is a sequel to the [CUDA Matrix Multiplication][prevous_example] example.
 
 This document introduces the CUDA shared memory.  We will demonstrate its
 usage for accelerating the matrix multiplication code developed preivously.
+
+
+[prevous_example]: https://github.com/ContinuumIO/numbapro-examples/blob/renew/new/matrixmult_intro.ipynb
 """
 
 from __future__ import absolute_import, print_function, division
