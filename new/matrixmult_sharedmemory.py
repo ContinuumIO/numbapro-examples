@@ -2,7 +2,8 @@
 # CUDA Matrix Multiplication with Shared Memory
 
 
-This is a sequel to the "CUDA Matrix Multiplication" example.
+This is a sequel to the [CUDA Matrix Multiplication](matrixmult_intro.html)
+example.
 
 This document introduces the CUDA shared memory.  We will demonstrate its
 usage for accelerating the matrix multiplication code developed preivously.
