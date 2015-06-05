@@ -17,7 +17,7 @@ from timeit import default_timer as timer
 # extra packages
 import numpy as np
 import numba
-from numba import cuda, jit, float32
+from numba import cuda, float32
 
 """
 **Version information:**
@@ -89,8 +89,20 @@ on the current matrix block to reuse memory loaded into the shared memory
 
 ### Synchronization
 
-TODO
+In each CUDA block, threads are cooperatively loading data into shared
+memory.  These threads are running concurrently and they may not be executing
+the same instruction.  We need a barrier ``cuda.syncthreads()`` to ensure
+all the threads have executed up to a certain point.  We need one before the
+data preload to sure the shared memory is not modified while some threads are
+still using it.  We need one after the data preload to ensure all the threads
+have completed the preloading.
 
+**Important Note**
+
+The barrier ``cuda.syncthreads()`` blocks **all** threads in the current block
+until all of them have reached the same location.  The behavior is
+**undefined** if some threads have returned.  Therefore, we need to keep all
+the threads in the block alive if some of them may execute a barrier.
 """
 
 block_per_grid = 10
@@ -132,7 +144,7 @@ def gpu_blocked_matrix_mult(matA, matB, matC):
         cuda.syncthreads()
 
         if in_bound:
-            # Cooperatively load from global memory into slower shared memory
+            # Cooperatively load from global memory into faster shared memory
             smA[tx, ty] = matA[x, ty + i * thread_per_block]
             smB[tx, ty] = matB[tx + i * thread_per_block, y]
 
@@ -169,8 +181,6 @@ npy_result = np.dot(matA, matB)
 
 assert np.allclose(npy_result, gpu_result)
 
-raise NotImplementedError
-
 """
 ## Comparing Speed
 """
@@ -188,31 +198,25 @@ def time_took(functor):
 
 
 """
-A function for that uses ``gpu_matrix_mult()`` with manual memory transfer
-"""
-
-
-def gpu_manual_memory(matA, matB):
-    device_matC = cuda.device_array_like(matA)
-    device_matA = cuda.to_device(matA)
-    device_matB = cuda.to_device(matB)
-    gpu_matrix_mult[griddim, blockdim](device_matA, device_matB, device_matC)
-    device_matC.copy_to_host()
-
-
-"""
 Generate timing
 """
 
-res = np.empty_like(matA)
-cpu_time = time_took(lambda: cpu_matrix_mult(matA, matB, res))
-gpu1_time = time_took(lambda: gpu_matrix_mult[griddim, blockdim](matA, matB,
-                                                                 res))
-gpu2_time = time_took(lambda: gpu_manual_memory(matA, matB))
+res_naive = np.empty_like(matA)
+res_blocked = np.empty_like(matA)
 
-assert gpu2_time < gpu1_time < cpu_time
+gpu1_time = time_took(
+    lambda: gpu_matrix_mult[griddim, blockdim](matA, matB, res_naive)
+)
+gpu2_time = time_took(
+    lambda: gpu_blocked_matrix_mult[griddim, blockdim](matA, matB, res_blocked)
+)
 
-fmt = "{0:>40s}: {1:.2f} seconds"
-print(fmt.format("numba cpu matrix mult", cpu_time))
-print(fmt.format("numba gpu matrix mult (auto transfer)", gpu1_time))
-print(fmt.format("numba gpu matrix mult (manual transfer)", gpu2_time))
+# result matches?
+assert np.allclose(res_naive, res_blocked)
+# faster?
+assert gpu2_time < gpu1_time
+
+fmt = "{0:>30s}: {1:.4f} seconds"
+print(fmt.format("naive version", gpu1_time))
+print(fmt.format("blocked+sharedmemory version", gpu2_time))
+print("Speedup: {0:.1f}x".format(gpu1_time / gpu2_time))

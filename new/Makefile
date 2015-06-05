@@ -21,4 +21,9 @@ clean:
 	rm -f $(EMPTYNOTEBOOKS) $(NOTEBOOKS) $(HTMLS)
 
 clean-html:
-	rm -f $(HTMLS)
+		rm -f $(HTMLS)
+
+clean-empty:
+			rm -f $(EMPTYNOTEBOOKS)
+
+clean-push: clean-html clean-empty
