@@ -1,4 +1,3 @@
-
 %.empty.ipynb: %.py
 	python -m py2nb $< $@
 
