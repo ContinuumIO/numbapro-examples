@@ -1,3 +1,11 @@
+"""
+# Solving Laplace 2D with Jacobi Relaxation
+
+Demonstrated Features:
+* Numba JIT
+* Numba CUDA JIT
+"""
+
 from __future__ import print_function
 
 import sys
@@ -6,7 +14,7 @@ from timeit import default_timer as timer
 import numpy as np
 
 import numba
-from numba import cuda, jit
+from numba import cuda, jit, float32
 
 """
 **Version information:**

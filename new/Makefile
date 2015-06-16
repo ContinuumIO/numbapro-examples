@@ -4,6 +4,7 @@ include Makefile.inc
 PROJECTS += matrixmult_intro
 PROJECTS += matrixmult_sharedmemory
 PROJECTS += laplace2d
+PROJECTS += monte_carlo_pricer
 
 
 # Don't modify the rest of the file
