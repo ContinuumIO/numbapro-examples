@@ -3,6 +3,7 @@ include Makefile.inc
 # Make new project names here
 PROJECTS += matrixmult_intro
 PROJECTS += matrixmult_sharedmemory
+PROJECTS += laplace2d
 
 
 # Don't modify the rest of the file
