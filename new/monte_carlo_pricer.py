@@ -1,5 +1,5 @@
 """
-A Monte Carlo Pricer
+# A Monte Carlo Pricer
 
 Demonstrated features:
 * Numba Vectorize
