@@ -3,7 +3,7 @@ from math import sqrt, exp
 from timeit import default_timer as timer
 #from matplotlib import pyplot
 
-from numba import autojit, jit, double, void
+from numba import jit, double, void
 
 @jit(double[:](double, double[:], double, double, double[:]))
 def step(dt, prices, c0, c1, noises):

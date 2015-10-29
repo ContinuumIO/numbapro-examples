@@ -1,7 +1,6 @@
 # Mandelbrot
 
-- `mandel_autojit.py`: implementation using `numba.autojit`.
-- `mandel_cu.py`: implementation using numbapro CU API.
+- `mandel_autojit.py`: implementation using `numba.jit` with callsite inference
 - `mandel_vectorize.py`: implementation using NumbaPro GPU vectorize.
 
 ## Running the examples

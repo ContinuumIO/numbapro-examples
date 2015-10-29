@@ -5,10 +5,10 @@ In CUDA-C, users can push and pop context to switch between context of different
 In CUDA Python, push/pop contexts is not supported yet.
 On the another hand, we support a multithreaded model in doing so since using threads in Python is easy and portable.
 
-## Beware 
+## Beware
 
 While the CUDA calls are threadsafe, the Numba compiler is not.
-Users must lock whenever calling any compiling functions (e.g. jit, autojit).
+Users must lock whenever calling any compiling functions (e.g. jit).
 
 
 ## Files

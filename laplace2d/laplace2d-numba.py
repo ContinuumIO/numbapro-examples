@@ -3,7 +3,7 @@ import time
 from numba import *
 
 
-@autojit(backend='ast')
+@jit
 def jocabi_relax_core(A, Anew):
     error = 0.0
     n = A.shape[0]
@@ -41,7 +41,7 @@ def main():
 
     while error > tol and iter < iter_max:
         error = jocabi_relax_core(A, Anew)
-    
+
         # swap A and Anew
         tmp = A
         A = Anew

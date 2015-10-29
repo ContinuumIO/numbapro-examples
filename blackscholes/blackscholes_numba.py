@@ -10,7 +10,7 @@ RISKFREE = 0.02
 VOLATILITY = 0.30
 
 
-@autojit
+@jit
 def cnd_numba(d):
     A1 = 0.31938153
     A2 = -0.356563782
@@ -26,7 +26,7 @@ def cnd_numba(d):
     return ret_val
 
 
-@autojit
+@jit
 def black_scholes_numba(callResult, putResult, stockPrice, optionStrike,
                         optionYears, Riskfree, Volatility):
     S = stockPrice
@@ -55,7 +55,7 @@ def main (*args):
     iterations = 10
     if len(args) >= 2:
         iterations = int(args[0])
-    
+
     callResultNumpy = np.zeros(OPT_N)
     putResultNumpy = -np.ones(OPT_N)
     stockPrice = randfloat(np.random.random(OPT_N), 5.0, 30.0)

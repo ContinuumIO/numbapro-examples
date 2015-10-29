@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import
-from numba import autojit
+from numba import jit
 from timeit import default_timer as timer
 import numpy as np
 from pylab import imshow, jet, show, ion
 
-@autojit
+@jit
 def mandel(x, y, max_iters):
     """
     Given the real and imaginary parts of a complex number,
@@ -22,7 +22,7 @@ def mandel(x, y, max_iters):
 
     return max_iters
 
-@autojit
+@jit
 def create_fractal(min_x, max_x, min_y, max_y, image, iters):
     height = image.shape[0]
     width = image.shape[1]
