@@ -1,4 +1,4 @@
 numbapro-examples
 =================
 
-Examples of NumbaPro in use.
+Examples of Numba and Accelerate in use.
