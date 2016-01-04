@@ -1,5 +1,5 @@
 from collections import deque
-from numbapro import cuda
+from numba import cuda
 
 if not hasattr(cuda, 'event'):
     raise Exception('All CUDA examples in this directory use features in the '

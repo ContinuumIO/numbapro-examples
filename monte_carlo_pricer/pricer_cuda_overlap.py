@@ -5,13 +5,16 @@ This version demonstrates copy-compute overlapping through multiple streams.
 
 import numpy as np
 import math
-import numbapro
-from numbapro import cuda, jit
-from numbapro.cudalib import curand
+import sys
+from numba import cuda, jit
+from accelerate.cuda.rand import PRNG
 from cuda_helper import MM
 
+if sys.version_info[0] == 2:
+    range = xrange
+
 @jit('void(double[:], double[:], double, double, double, double[:])',
-     target='gpu')
+     target='cuda')
 def cu_step(last, paths, dt, c0, c1, normdist):
     i = cuda.grid(1)
     if i >= paths.shape[0]:
@@ -40,7 +43,7 @@ def monte_carlo_pricer(paths, dt, interest, volatility):
 
     strmlist = [cuda.stream() for _ in range(num_streams)]
 
-    prnglist = [curand.PRNG(curand.PRNG.MRG32K3A, stream=strm)
+    prnglist = [PRNG(PRNG.MRG32K3A, stream=strm)
                 for strm in strmlist]
 
     # Allocate device side array
@@ -58,7 +61,7 @@ def monte_carlo_pricer(paths, dt, interest, volatility):
     d_lastlist = [cuda.to_device(paths[s:e, 0], to=mm.get(stream=strm))
                   for (s, e), strm in zip(partitions, strmlist)]
 
-    for j in xrange(1, paths.shape[1]):
+    for j in range(1, paths.shape[1]):
         for prng, d_norm in zip(prnglist, d_normlist):
             prng.normal(d_norm, mean=0, sigma=1)
 

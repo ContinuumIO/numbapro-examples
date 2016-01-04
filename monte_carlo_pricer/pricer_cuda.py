@@ -3,9 +3,8 @@
 import numpy as np
 import math
 
-import numbapro
-from numbapro import cuda, jit
-from numbapro.cudalib import curand
+from numba import cuda, jit
+from accelerate.cuda.rand import PRNG
 from cuda_helper import MM
 
 
@@ -27,7 +26,7 @@ def monte_carlo_pricer(paths, dt, interest, volatility):
     gridsz = int(math.ceil(float(n) / blksz))
 
     stream = cuda.stream()
-    prng = curand.PRNG(curand.PRNG.MRG32K3A, stream=stream)
+    prng = PRNG(PRNG.MRG32K3A, stream=stream)
 
     # Allocate device side array
     d_normdist = cuda.device_array(n, dtype=np.double, stream=stream)

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import numpy as np
 from math import sqrt, exp
@@ -10,7 +11,7 @@ def driver(pricer, pinned=False):
     DT = Maturity / NumStep
 
     if pinned:
-        from numbapro import cuda
+        from numba import cuda
         with cuda.pinned(paths):
             ts = timer()
             pricer(paths, DT, InterestRate, Volatility)
@@ -22,24 +23,24 @@ def driver(pricer, pinned=False):
 
     ST = paths[:, -1]
     PaidOff = np.maximum(paths[:, -1] - StrikePrice, 0)
-    print 'Result'
+    print('Result')
     fmt = '%20s: %s'
-    print fmt % ('stock price', np.mean(ST))
-    print fmt % ('standard error', np.std(ST) / sqrt(NumPath))
-    print fmt % ('paid off', np.mean(PaidOff))
+    print(fmt % ('stock price', np.mean(ST)))
+    print(fmt % ('standard error', np.std(ST) / sqrt(NumPath)))
+    print(fmt % ('paid off', np.mean(PaidOff)))
     optionprice = np.mean(PaidOff) * exp(-InterestRate * Maturity)
-    print fmt % ('option price', optionprice)
+    print(fmt % ('option price', optionprice))
 
-    print 'Performance'
+    print('Performance')
     NumCompute = NumPath * NumStep
-    print fmt % ('Mstep/second', '%.2f' % (NumCompute / (te - ts) / 1e6))
-    print fmt % ('time elapsed', '%.3fs' % (te - ts))
+    print(fmt % ('Mstep/second', '%.2f' % (NumCompute / (te - ts) / 1e6)))
+    print(fmt % ('time elapsed', '%.3fs' % (te - ts)))
 
     if '--plot' in sys.argv:
         from matplotlib import pyplot
         pathct = min(NumPath, 100)
         for i in xrange(pathct):
             pyplot.plot(paths[i])
-        print 'Plotting %d/%d paths' % (pathct, NumPath)
+        print('Plotting %d/%d paths' % (pathct, NumPath))
         pyplot.show()
 
