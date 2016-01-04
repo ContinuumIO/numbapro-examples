@@ -2,7 +2,7 @@
 
 - `blackscholes.py`: numpy implementation
 - `blackscholes_numba.py`: numba implementation
-- `blackscholes_cuda.py`: numbapro cuda implementation
+- `blackscholes_cuda.py`: numba cuda implementation
 
 
 ## Run benchmark for all three versions

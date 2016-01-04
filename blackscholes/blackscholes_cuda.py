@@ -2,7 +2,6 @@ import numpy as np
 import math
 import time
 from numba import *
-from numbapro import cuda
 from blackscholes_numba import black_scholes, black_scholes_numba
 #import logging; logging.getLogger().setLevel(0)
 
@@ -68,8 +67,8 @@ def main (*args):
     optionYears = randfloat(np.random.random(OPT_N), 0.25, 10.0)
     callResultNumba = np.zeros(OPT_N)
     putResultNumba = -np.ones(OPT_N)
-    callResultNumbapro = np.zeros(OPT_N)
-    putResultNumbapro = -np.ones(OPT_N)
+    callResultCuda = np.zeros(OPT_N)
+    putResultCuda = -np.ones(OPT_N)
 
     time0 = time.time()
     for i in range(iterations):
@@ -91,8 +90,8 @@ def main (*args):
     blockdim = 1024, 1
     griddim = int(math.ceil(float(OPT_N)/blockdim[0])), 1
     stream = cuda.stream()
-    d_callResult = cuda.to_device(callResultNumbapro, stream)
-    d_putResult = cuda.to_device(putResultNumbapro, stream)
+    d_callResult = cuda.to_device(callResultCuda, stream)
+    d_putResult = cuda.to_device(putResultCuda, stream)
     d_stockPrice = cuda.to_device(stockPrice, stream)
     d_optionStrike = cuda.to_device(optionStrike, stream)
     d_optionYears = cuda.to_device(optionYears, stream)
@@ -106,17 +105,17 @@ def main (*args):
         stream.synchronize()
     time2 = time.time()
     dt = (time1 - time0) * 10 + (time2 - time1)
-    print("numbapro.cuda time: %f msec" % ((1000 * dt) / iterations))
+    print("numba.cuda time: %f msec" % ((1000 * dt) / iterations))
 
     delta = np.abs(callResultNumpy - callResultNumba)
     L1norm = delta.sum() / np.abs(callResultNumpy).sum()
     print("L1 norm: %E" % L1norm)
     print("Max absolute error: %E" % delta.max())
 
-    delta = np.abs(callResultNumpy - callResultNumbapro)
+    delta = np.abs(callResultNumpy - callResultCuda)
     L1norm = delta.sum() / np.abs(callResultNumpy).sum()
-    print("L1 norm (Numbapro): %E" % L1norm)
-    print("Max absolute error (Numbapro): %E" % delta.max())
+    print("L1 norm (CUDA): %E" % L1norm)
+    print("Max absolute error (CUDA): %E" % delta.max())
 
 if __name__ == "__main__":
     import sys
