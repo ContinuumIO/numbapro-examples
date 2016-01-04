@@ -6,8 +6,9 @@ time because kernel calls are aynchronous---it returns before the work in
 completed.
 '''
 
+from __future__ import print_function
 from timeit import default_timer as timer
-from numbapro import cuda
+from numba import cuda
 import numpy as np
 
 @cuda.jit('void(float32[:], float32[:])')
@@ -21,7 +22,7 @@ BLOCKSIZE = 256
 
 aryA = np.arange(BLOCKSIZE * BLOCKCOUNT, dtype=np.float32)
 
-print 'data size: %.1fMB' % (aryA.size * aryA.dtype.itemsize / (2**20))
+print('data size: %.1fMB' % (aryA.size * aryA.dtype.itemsize / (2**20)))
 
 evt_total_begin = cuda.event()
 evt_total_end = cuda.event()
@@ -53,11 +54,11 @@ t_total_end = timer()
 
 assert np.all(aryA == aryB)
 
-print 'CUDA EVENT TIMING'.center(80, '=')
-print 'total time: %fms' % evt_total_begin.elapsed_time(evt_total_end)
-print 'kernel time: %fms' % evt_kernel_begin.elapsed_time(evt_kernel_end)
-print 'PYTHON TIMING'.center(80, '=')
-print 'total time: %fms' % (float(t_total_end - t_total_begin) * 1000)
-print 'kernel time: %fms' % (float(t_kernel_end - t_kernel_begin) * 1000)
+print('CUDA EVENT TIMING'.center(80, '='))
+print('total time: %fms' % evt_total_begin.elapsed_time(evt_total_end))
+print('kernel time: %fms' % evt_kernel_begin.elapsed_time(evt_kernel_end))
+print('PYTHON TIMING'.center(80, '='))
+print('total time: %fms' % (float(t_total_end - t_total_begin) * 1000))
+print('kernel time: %fms' % (float(t_kernel_end - t_kernel_begin) * 1000))
 
 
