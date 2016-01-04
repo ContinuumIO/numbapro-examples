@@ -31,8 +31,8 @@ import numpy as np
 from scipy.signal import fftconvolve
 from scipy import misc, ndimage
 from matplotlib import pyplot as plt
-from numbapro.cudalib import cufft
-from numbapro import cuda
+from accelerate.cuda.fft import FFTPlan
+from numba import cuda
 from timeit import default_timer as timer
 
 @cuda.jit('void(complex64[:,:], complex64[:,:])')
@@ -83,7 +83,7 @@ def main():
     # Trigger initialization the cuFFT system.
     # This takes significant time for small dataset.
     # We should not be including the time wasted here
-    cufft.FFTPlan(shape=image.shape, itype=np.complex64, otype=np.complex64)
+    FFTPlan(shape=image.shape, itype=np.complex64, otype=np.complex64)
 
     # Start GPU timer
     ts = timer()
@@ -93,9 +93,9 @@ def main():
     stream1 = cuda.stream()
     stream2 = cuda.stream()
 
-    fftplan1 = cufft.FFTPlan(shape=image.shape, itype=np.complex64,
+    fftplan1 = FFTPlan(shape=image.shape, itype=np.complex64,
                             otype=np.complex64, stream=stream1)
-    fftplan2 = cufft.FFTPlan(shape=image.shape, itype=np.complex64,
+    fftplan2 = FFTPlan(shape=image.shape, itype=np.complex64,
                         otype=np.complex64, stream=stream2)
 
     # pagelock memory

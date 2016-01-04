@@ -3,8 +3,13 @@
 See Numpy documentation for detail about gufunc:
     http://docs.scipy.org/doc/numpy/reference/c-api.generalized-ufuncs.html
 '''
+from __future__ import print_function
 import numpy as np
-from numbapro import guvectorize, cuda
+import sys
+from numba import guvectorize, cuda
+
+if sys.version_info[0] == 2:
+    range = xrange
 
 # Controls whether to manually handle CUDA memory allocation or not.
 MANAGE_CUDA_MEMORY = True
@@ -17,7 +22,7 @@ MANAGE_CUDA_MEMORY = True
 #    signature: (n)->()
 #        - the function takes an array of n-element and output a scalar.
 
-@guvectorize(['void(int32[:], int32[:])'], '(n)->()', target='gpu')
+@guvectorize(['void(int32[:], int32[:])'], '(n)->()', target='cuda')
 def sum_row(inp, out):
     tmp = 0.
     for i in range(inp.shape[0]):
@@ -49,12 +54,12 @@ else:
 
 # verify result
 goal = np.empty_like(out)
-for i in xrange(inp.shape[0]):
+for i in range(inp.shape[0]):
     assert out[i] == inp[i].sum()
 
 # print out
-print 'input'.center(80, '-')
-print inp
-print 'output'.center(80, '-')
-print out
+print('input'.center(80, '-'))
+print(inp)
+print('output'.center(80, '-'))
+print(out)
 

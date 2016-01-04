@@ -1,5 +1,5 @@
+from __future__ import print_function
 import polynomial as poly
-from numbapro import vectorize, cuda
 from numba import *
 import numpy as np
 from timeit import default_timer as time
@@ -7,18 +7,18 @@ import sys
 
 def main():
     cu_discriminant = vectorize([f4(f4, f4, f4), f8(f8, f8, f8)],
-                                target='gpu')(poly.discriminant)
+                                target='cuda')(poly.discriminant)
 
     N = 1e+8 // 2
 
-    print 'Data size', N
+    print('Data size', N)
     
     A, B, C = poly.generate_input(N, dtype=np.float32)
     D = np.empty(A.shape, dtype=A.dtype)
 
     stream = cuda.stream()
 
-    print '== One'
+    print('== One')
 
     ts = time()
 
@@ -35,15 +35,15 @@ def main():
 
     total_time = (te - ts)
 
-    print 'Execution time %.4f' % total_time
-    print 'Throughput %.2f' % (N / total_time)
+    print('Execution time %.4f' % total_time)
+    print('Throughput %.2f' % (N / total_time))
 
-    print '== Chunked'
+    print('== Chunked')
 
     chunksize = 1e+7
     chunkcount = N // chunksize
 
-    print 'Chunk size', chunksize
+    print('Chunk size', chunksize)
 
     sA = np.split(A, chunkcount)
     sB = np.split(B, chunkcount)
@@ -68,8 +68,8 @@ def main():
 
     total_time = (te - ts)
 
-    print 'Execution time %.4f' % total_time
-    print 'Throughput %.2f' % (N / total_time)
+    print('Execution time %.4f' % total_time)
+    print('Throughput %.2f' % (N / total_time))
 
 
     if '-verify' in sys.argv[1:]:

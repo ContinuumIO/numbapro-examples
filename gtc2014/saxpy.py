@@ -10,9 +10,10 @@ Where
 
 Prefix 'S' indicates single-precision float32 operations
 """
+from __future__ import print_function
 import sys
 import numpy
-from numbapro import cuda, vectorize, float32, void
+from numba import cuda, vectorize, float32, void
 
 # GPU code
 # ---------
@@ -34,7 +35,7 @@ elementwise operation over the input arrays.
 """
 
 @vectorize([float32(float32, float32, float32)],
-		   target='gpu')
+		   target='cuda')
 def vec_saxpy(a, x, y):
 	### Task 1 ###
 	# Complete the vectorize version
@@ -62,17 +63,17 @@ def task1():
 	griddim = NUM_BLOCKS
 	blockdim = NUM_THREADS
 	saxpy[griddim, blockdim](a, x, y, out)
-	print "out =", out
+	print("out =", out)
 
 	vecout = vec_saxpy(a, x, y)
 
-	print "vecout =", vecout
+	print("vecout =", vecout)
 
 	# Check output
 	if not (out == vecout).all():
-		print "Incorrect result"
+		print("Incorrect result")
 	else:
-		print "Correct result"
+		print("Correct result")
 
 
 def task2():
@@ -93,12 +94,12 @@ def task2():
 	saxpy[griddim, blockdim](a, dx, dy, dout)
 
 	out = dout.copy_to_host()
-	print "out =", out
+	print("out =", out)
 
 	if numpy.allclose(a * x + y, out):
-		print "Correct result"
+		print("Correct result")
 	else:
-		print "Incorrect result"
+		print("Incorrect result")
 
 
 # ----------------------------------------------------------------------------
@@ -126,7 +127,7 @@ def main():
 	elif '--task2' in sys.argv[1:]:
 		task2()
 	else:
-		print HELPER % {'this': sys.argv[0]}
+		print(HELPER % {'this': sys.argv[0]})
 
 if __name__ == '__main__':
 	main()

@@ -1,14 +1,13 @@
 # Mandelbrot
 
 - `mandel_autojit.py`: implementation using `numba.jit` with callsite inference
-- `mandel_vectorize.py`: implementation using NumbaPro GPU vectorize.
+- `mandel_vectorize.py`: implementation using Numba GPU vectorize.
 
 ## Running the examples
 
-All scripts are runnable.  
-
-`mandel_cu.py` --- takes an optional commandline argument for target selection.
+All scripts are runnable.
 
 ```bash
-python mandel_cu.py [cpu|gpu]
+python mandel_autojit.py
+python mandel_vectorize.py
 ```

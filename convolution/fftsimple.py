@@ -31,11 +31,11 @@ import numpy as np
 from scipy.signal import fftconvolve
 from scipy import misc, ndimage
 from matplotlib import pyplot as plt
-from numbapro.cudalib import cufft
-from numbapro import cuda, vectorize
+from accelerate.cuda.fft import FFTPlan, fft_inplace, ifft_inplace
+from numba import cuda, vectorize
 from timeit import default_timer as timer
 
-@vectorize(['complex64(complex64, complex64)'], target='gpu')
+@vectorize(['complex64(complex64, complex64)'], target='cuda')
 def vmult(a, b):
     return a * b
 
@@ -81,7 +81,7 @@ def main():
     # Trigger initialization the cuFFT system.
     # This takes significant time for small dataset.
     # We should not be including the time wasted here
-    cufft.FFTPlan(shape=image.shape, itype=np.complex64, otype=np.complex64)
+    FFTPlan(shape=image.shape, itype=np.complex64, otype=np.complex64)
 
     # Start GPU timer
     ts = timer()
@@ -91,12 +91,12 @@ def main():
     d_image_complex = cuda.to_device(image_complex)
     d_response_complex = cuda.to_device(response_complex)
 
-    cufft.fft_inplace(d_image_complex)
-    cufft.fft_inplace(d_response_complex)
+    fft_inplace(d_image_complex)
+    fft_inplace(d_response_complex)
 
     vmult(d_image_complex, d_response_complex, out=d_image_complex)
 
-    cufft.ifft_inplace(d_image_complex)
+    ifft_inplace(d_image_complex)
 
     cvimage_gpu = d_image_complex.copy_to_host().real / np.prod(image.shape)
 

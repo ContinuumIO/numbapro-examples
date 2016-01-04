@@ -1,8 +1,9 @@
+from __future__ import print_function
 from timeit import default_timer as timer
 import math
 import numpy as np
 import pylab
-from numbapro import cuda, cudadrv
+from numba import cuda
 # For machine with multiple devices
 cuda.select_device(0)
 
@@ -139,18 +140,14 @@ def vec_add_ilp_x8(a, b, c):
 def time_this(kernel, gridsz, blocksz, args):
     timings = []
     cuda.synchronize()
-    try:
-        for i in range(10): # best of 10
-            ts = timer()
-            kernel[gridsz, blocksz](*args)
-            cuda.synchronize()
-            te = timer()    
-            timings.append(te - ts)
-    except cudadrv.error.CudaDriverError, e:
-        print 'exc suppressed', e
-        return -1
-    else:
-        return sum(timings) / len(timings)
+    for i in range(10): # best of 10
+        ts = timer()
+        kernel[gridsz, blocksz](*args)
+        cuda.synchronize()
+        te = timer()
+        timings.append(te - ts)
+
+    return sum(timings) / len(timings)
 
 def ceil_to_nearest(n, m):
     return int(math.ceil(n / m) * m)
@@ -176,13 +173,13 @@ def main():
     for multiplier in range(1, maxtpb // warpsize + 1):
         blksz = warpsize * multiplier
         gridsz = ceil_to_nearest(float(approx_data_size) / blksz, 8)
-        print 'kernel config [%d, %d]' % (gridsz, blksz)
+        print('kernel config [%d, %d]' % (gridsz, blksz))
 
         N = blksz * gridsz
         A = np.arange(N, dtype=np.float32)
         B = np.arange(N, dtype=np.float32)
 
-        print 'data size %dMB' % (N / 2.**20 * A.dtype.itemsize)
+        print('data size %dMB' % (N / 2.**20 * A.dtype.itemsize))
 
         dA = cuda.to_device(A)
         dB = cuda.to_device(B)

@@ -2,9 +2,9 @@
 Example vectorize usage.
 '''
 
+from __future__ import print_function
 import numpy as np
 from numba import *
-from numbapro import vectorize
 from timeit import default_timer as time
 import math
 import sys
@@ -16,7 +16,7 @@ def sum(a, b):
     return a + b
 
 def main():
-    targets = ['cpu', 'stream', 'parallel']
+    targets = ['cpu', 'parallel']
     
     # run just one target if is specified in the argument
     for t in targets:
@@ -25,7 +25,7 @@ def main():
             break
 
     for target in targets:
-        print '== Target', target
+        print('== Target', target)
         vect_sum = vectorize([f4(f4, f4), f8(f8, f8)],
                              target=target)(sum)
 
@@ -37,7 +37,7 @@ def main():
 
         D = np.empty(A.shape, dtype=A.dtype)
 
-        print 'Data size', N
+        print('Data size', N)
 
         ts = time()
         D = vect_sum(A, B)
@@ -45,8 +45,8 @@ def main():
 
         total_time = (te - ts)
 
-        print 'Execution time %.4f' % total_time
-        print 'Throughput %.4f' % (N / total_time)
+        print('Execution time %.4f' % total_time)
+        print('Throughput %.4f' % (N / total_time))
 
         if '-verify' in sys.argv[1:]:
             assert np.allclose

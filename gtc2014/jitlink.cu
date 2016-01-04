@@ -1,5 +1,5 @@
 /*
-NumbaPro requires return value to be passed as
+Numba requires return value to be passed as
 a pointer in the first argument.
 
 

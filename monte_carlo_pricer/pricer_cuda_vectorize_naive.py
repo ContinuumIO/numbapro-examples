@@ -1,11 +1,10 @@
 import numpy as np
 import math
 
-import numbapro
-from numbapro import cuda, vectorize
-from numbapro.cudalib import curand
+from numba import cuda, vectorize
+from accelerate.cuda.rand import PRNG
 
-@vectorize(['f8(f8, f8, f8, f8, f8)'], target='gpu')
+@vectorize(['f8(f8, f8, f8, f8, f8)'], target='cuda')
 def step(last, dt, c0, c1, noise):
     return last * math.exp(c0 * dt + c1 * noise)
 
@@ -16,7 +15,7 @@ def monte_carlo_pricer(paths, dt, interest, volatility):
     gridsz = int(math.ceil(float(n) / blksz))
 
     # Instantiate cuRAND PRNG
-    prng = curand.PRNG(curand.PRNG.MRG32K3A)
+    prng = PRNG(PRNG.MRG32K3A)
 
     # Allocate device side array
     d_normdist = cuda.device_array(n, dtype=np.double)
