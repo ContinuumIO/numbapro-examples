@@ -1,9 +1,10 @@
+from __future__ import print_function
 import numpy as np
 from math import ceil
 import threading
-from numbapro import cuda
+from numba import cuda
 
-print 'System has %d CUDA devices' % len(cuda.list_devices())
+print('System has %d CUDA devices' % len(cuda.list_devices()))
 
 signature = 'void(int32[:], int32[:])'
 
@@ -24,7 +25,7 @@ def device_controller(cid):
 
     # print some information about the CUDA card
     prefix = '[%s]' % device
-    print prefix, 'device_controller', cid, '| CC', device.COMPUTE_CAPABILITY
+    print(prefix, 'device_controller', cid, '| CC', device.COMPUTE_CAPABILITY)
     
     max_thread = device.MAX_THREADS_PER_BLOCK
 
@@ -46,7 +47,7 @@ def device_controller(cid):
         ngrid = 1
         nthread = N
 
-    print prefix, 'grid x thread = %d x %d' % (ngrid, nthread)
+    print(prefix, 'grid x thread = %d x %d' % (ngrid, nthread))
 
     # real CUDA work
     d_data = cuda.to_device(data)                   # transfer to device
@@ -68,7 +69,7 @@ def main():
     for t in children:
         t.join()
 
-    print 'ending gracefully'
+    print('ending gracefully')
 
 if __name__ == '__main__':
     main()
