@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 #from __future__ import print_function, division, absolute_import
 import sys
-from numbapro import vectorize
+from numba import vectorize
 import numpy as np
 from timeit import default_timer as timer
 from pylab import imshow, jet, show, ion
 
 sig = 'uint8(uint32, f8, f8, f8, f8, uint32, uint32, uint32)'
 
-@vectorize([sig], target='gpu')
+@vectorize([sig], target='cuda')
 def mandel(tid, min_x, max_x, min_y, max_y, width, height, iters):
     pixel_size_x = (max_x - min_x) / width
     pixel_size_y = (max_y - min_y) / height
