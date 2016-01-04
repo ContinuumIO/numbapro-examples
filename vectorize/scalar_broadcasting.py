@@ -8,7 +8,7 @@ http://docs.scipy.org/doc/numpy/user/basics.broadcasting.html
 
 from __future__ import print_function
 import numpy as np
-from numbapro import vectorize, float32
+from numba import vectorize, float32
 
 @vectorize([float32(float32, float32, float32)], target='parallel')
 def truncate(x, xmin, xmax):

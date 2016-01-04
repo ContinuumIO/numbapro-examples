@@ -2,11 +2,13 @@
 Demonstrate the vectorize API with automatical memory transfer and
 manual memory transfer.
 '''
+from __future__ import print_function
 from timeit import default_timer as timer
+from numba import vectorize, float64, cuda
 import numpy
-from numbapro import vectorize, float64, cuda
 
-@vectorize([float64(float64, float64)], target='gpu')
+
+@vectorize([float64(float64, float64)], target='cuda')
 def vector_mul(a, b):
     return  a * b
 
@@ -15,16 +17,16 @@ b = numpy.random.rand(10000000)
 
 # Let NumbaPro automatically convert host memory to device memory
 ts = timer()
-for i in xrange(10):
+for i in range(10):
     result = vector_mul(a, b)
 te = timer()
 
-print 'auto', te - ts
+print('auto', te - ts)
 
 
 # Manual conversion between host and device memory
 ts = timer()
-for i in xrange(10):
+for i in range(10):
     # copy host memory to device
     da = cuda.to_device(a)
     db = cuda.to_device(b)
@@ -43,7 +45,7 @@ del db
 del dresult
 te = timer()
 
-print 'manual', te - ts
+print('manual', te - ts)
 
 # The reason that the manual version is faster is due to the timing for which
 # the device memory is freed.
