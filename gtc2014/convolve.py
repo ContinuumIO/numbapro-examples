@@ -1,22 +1,23 @@
 """
 Convolve
 """
+from __future__ import print_function
 import sys
 import numpy as np
 from scipy.signal import fftconvolve
 from scipy import misc, ndimage
-from numbapro.cudalib import cufft
-from numbapro import cuda, vectorize
+from accelerate.cuda.fft import FFTPlan, fft_inplace, ifft_inplace
+from numba import cuda, vectorize
 from timeit import default_timer as timer
 
-@vectorize(['complex64(complex64, complex64)'], target='gpu')
+@vectorize(['complex64(complex64, complex64)'], target='cuda')
 def vmult(a, b):
     """Element complex64 multiplication
     """
     return a * b
 
 
-def task1(cufft, d_image_complex, d_response_complex):
+def task1(d_image_complex, d_response_complex):
     ### Task1 ###
     # Implement a inplace CUDA FFT convolution
     # Pseduocode:
@@ -26,8 +27,8 @@ def task1(cufft, d_image_complex, d_response_complex):
     #   output = ifft(freq_out)
     #
     # Use the cuFFT functions:
-    #   - cufft.fft_inplace(ary)
-    #   - cufft.ifft_inplace(ary)
+    #   - fft_inplace(ary)
+    #   - ifft_inplace(ary)
     #
     # Call `vmult` which is our elementwise complex multiplication.
     # Do a inplace operation on `d_image_complex`.
@@ -36,12 +37,12 @@ def task1(cufft, d_image_complex, d_response_complex):
     #   - length of d_image_complex and d_response_complex has the same length.
 
 
-    cufft.fft_inplace(d_image_complex)
-    cufft.fft_inplace(d_response_complex)
+    fft_inplace(d_image_complex)
+    fft_inplace(d_response_complex)
 
     vmult(d_image_complex, d_response_complex, out=d_image_complex)
 
-    cufft.ifft_inplace(d_image_complex)
+    ifft_inplace(d_image_complex)
 
     # At this point, we have applied the filter onto d_image_complex
     return  # Does not return anything
@@ -64,7 +65,7 @@ def convolve():
 
     image = get_image()
 
-    print "Image size: %s" % (image.shape,)
+    print("Image size: %s" % (image.shape,))
 
     response = np.zeros_like(image)
     response[:5, :5] = laplacian
@@ -74,7 +75,7 @@ def convolve():
     ts = timer()
     cvimage_cpu = fftconvolve(image, laplacian, mode='same')
     te = timer()
-    print 'CPU: %.2fs' % (te - ts)
+    print('CPU: %.2fs' % (te - ts))
 
     # GPU
     threadperblock = 32, 8
@@ -82,7 +83,7 @@ def convolve():
     print('kernel config: %s x %s' % (blockpergrid, threadperblock))
 
     # Initialize the cuFFT system.
-    cufft.FFTPlan(shape=image.shape, itype=np.complex64, otype=np.complex64)
+    FFTPlan(shape=image.shape, itype=np.complex64, otype=np.complex64)
 
     # Start GPU timer
     ts = timer()
@@ -92,12 +93,12 @@ def convolve():
     d_image_complex = cuda.to_device(image_complex)
     d_response_complex = cuda.to_device(response_complex)
 
-    task1(cufft, d_image_complex, d_response_complex)
+    task1(d_image_complex, d_response_complex)
 
     cvimage_gpu = d_image_complex.copy_to_host().real / np.prod(image.shape)
 
     te = timer()
-    print 'GPU: %.2fs' % (te - ts)
+    print('GPU: %.2fs' % (te - ts))
 
     return cvimage_cpu, cvimage_gpu
 
@@ -122,9 +123,9 @@ def main():
     try:
         from matplotlib import pyplot as plt
     except ImportError:
-        print "To render the images"
-        print "Do `conda install matplotlib` on the terminal"
-        print "Then, rerun"
+        print("To render the images")
+        print("Do `conda install matplotlib` on the terminal")
+        print("Then, rerun")
     else:
         plt.subplot(1, 2, 1)
         plt.title('CPU')
