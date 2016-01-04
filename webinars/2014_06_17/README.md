@@ -29,7 +29,7 @@ you can run the webinar on your machine.
 
 1. Download Anaconda: http://continuum.io/downloads
 2. Once Anaconda is installed, you will have access to ``conda`` in the terminal
-3. Install numbapro in terminal ``$ conda install accelerate``.  Details about Accelerate: https://store.continuum.io/cshop/accelerate/
+3. Install Accelerate in terminal ``$ conda install accelerate``.  Details about Accelerate: https://store.continuum.io/cshop/accelerate/
 4. You should be able ``import accelerate`` in python now
 5. Get Jupyter notebook: ``$ conda install jupyter``
 6. Launch ``$ jupyter notebook`` in the directory containing the notebook.
