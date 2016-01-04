@@ -1,12 +1,12 @@
 '''
 This example uses cuBLAS gemm routine to perform matrix-matrix multiplication.
 Please refer to the documentation for details of how to use the gemm routine
-  http://docs.continuum.io/numbapro/cudalib.html#blas-level-2
-  
+  http://docs.continuum.io/accelerate/cublas#blas-level-2
+
 Note: cuBLAS uses Fortran layout
 '''
 
-import numbapro.cudalib.cublas as cublas
+from accelerate.cuda.blas import Blas
 import numpy as np
 from timeit import default_timer as timer
 
@@ -29,8 +29,8 @@ def gemm_v1():
     print("Numpy took %f seconds" % numpy_time)
 
     # cuBLAS
-    blas = cublas.Blas()
-    
+    blas = Blas()
+
     start = timer()
     blas.gemm('N', 'N', N, N, N, 1.0, A, np.diag(B), 1.0, D)
     cuda_time = timer() - start
@@ -46,9 +46,9 @@ def gemm_v2():
     originally.  Note that the output matrix is still in Fortran array.
     The string arguments in gemm tells it to apply transformation on the input
     matrices.
-    
+
     See argument description in:
-        http://docs.continuum.io/numbapro/cudalib.html#blas-level-2
+        http://docs.continuum.io/accelerate/cublas#blas-level-2
     """
     print("Version 2".center(80, '='))
     # Prepare arrays for input
@@ -63,8 +63,8 @@ def gemm_v2():
     print("Numpy took %f seconds" % numpy_time)
 
     # cuBLAS
-    blas = cublas.Blas()
-    
+    blas = Blas()
+
     start = timer()
     blas.gemm('T', 'T', N, N, N, 1.0, A, np.diag(B), 1.0, D)
     cuda_time = timer() - start
