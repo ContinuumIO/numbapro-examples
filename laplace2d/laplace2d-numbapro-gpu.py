@@ -2,10 +2,10 @@
 Speed on OS X 10.8 650M 1024GB GPU: 186s
 '''
 
+from __future__ import print_function
 import numpy as np
 import time
 from numba import *
-from numbapro import cuda
 
 
 # NOTE: CUDA kernel does not return any value
@@ -40,7 +40,7 @@ def main():
         A[j, 0] = 1.0
         Anew[j, 0] = 1.0
 
-    print "Jacobi relaxation Calculation: %d x %d mesh" % (n, m)
+    print("Jacobi relaxation Calculation: %d x %d mesh" % (n, m))
 
     timer = time.time()
     iter = 0
@@ -75,12 +75,12 @@ def main():
         dAnew = tmp
 
         if iter % 100 == 0:
-            print "%5d, %0.6f (elapsed: %f s)" % (iter, error, time.time()-timer)
+            print("%5d, %0.6f (elapsed: %f s)" % (iter, error, time.time()-timer))
 
         iter += 1
 
     runtime = time.time() - timer
-    print " total: %f s" % runtime
+    print(" total: %f s" % runtime)
 
 if __name__ == '__main__':
     main()
