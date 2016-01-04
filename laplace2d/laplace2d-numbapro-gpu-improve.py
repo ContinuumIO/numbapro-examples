@@ -1,7 +1,7 @@
 '''
 Speed on OS X 10.8 650M 1024GB GPU: 186s
 '''
-from __future__ import print_function
+from __future__ import print_function, division
 import numpy as np
 import time
 from numba import *
@@ -82,29 +82,29 @@ def main():
     iter = 0
 
     blockdim = (tpb, tpb)
-    griddim = (NN/blockdim[0], NM/blockdim[1])
-        
+    griddim = (NN//blockdim[0], NM//blockdim[1])
+
     error_grid = np.zeros(griddim)
-    
+
     stream = cuda.stream()
 
     dA = cuda.to_device(A, stream)          # to device and don't come back
     dAnew = cuda.to_device(Anew, stream)    # to device and don't come back
     derror_grid = cuda.to_device(error_grid, stream)
-    
+
     while error > tol and iter < iter_max:
         assert error_grid.dtype == np.float64
-        
+
         jocabi_relax_core[griddim, blockdim, stream](dA, dAnew, derror_grid)
-        
+
         derror_grid.to_host(stream)
-        
-        
+
+
         # error_grid is available on host
         stream.synchronize()
-        
+
         error = np.abs(error_grid).max()
-        
+
         # swap dA and dAnew
         tmp = dA
         dA = dAnew

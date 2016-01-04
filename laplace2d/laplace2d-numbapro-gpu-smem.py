@@ -2,7 +2,7 @@
 Speed on OS X 10.8 650M 1024GB GPU: 186s
 '''
 
-from __future__ import print_function
+from __future__ import print_function, division
 import numpy as np
 import time
 from numba import *
@@ -21,10 +21,10 @@ def jocabi_relax_core(A, Anew, error):
 
     j = ty + cuda.blockIdx.y * cuda.blockDim.y
     i = tx + cuda.blockIdx.x * cuda.blockDim.x
-    
+
     sy = ty + 1
     sx = tx + 1
-    
+
     smem[sy, sx] = A[j, i]
     if tx == 0 and i >= 1:
         smem[sy, 0] = A[j, i - 1]
@@ -39,7 +39,7 @@ def jocabi_relax_core(A, Anew, error):
         smem[33, sx] = A[j + 1, i]
 
     cuda.syncthreads() # ensure smem is visible by all threads in the block
-    
+
     if j >= 1 and j < n - 1 and i >= 1 and i < m - 1:
         Anew[j, i] = 0.25 * ( smem[sy, sx + 1] + smem[sy, sx - 1] \
                             + smem[sy - 1, sx] + smem[sy + 1, sx])
@@ -69,29 +69,29 @@ def main():
     iter = 0
 
     blockdim = (32, 32)
-    griddim = (NN/blockdim[0], NM/blockdim[1])
-        
+    griddim = (NN//blockdim[0], NM//blockdim[1])
+
     error_grid = np.zeros_like(A)
-    
+
     stream = cuda.stream()
 
     dA = cuda.to_device(A, stream)          # to device and don't come back
     dAnew = cuda.to_device(Anew, stream)    # to device and don't come back
     derror_grid = cuda.to_device(error_grid, stream)
-    
+
     while error > tol and iter < iter_max:
         assert error_grid.dtype == np.float64
-        
+
         jocabi_relax_core[griddim, blockdim, stream](dA, dAnew, derror_grid)
-        
+
         derror_grid.to_host(stream)
-        
-        
+
+
         # error_grid is available on host
         stream.synchronize()
-        
+
         error = np.abs(error_grid).max()
-        
+
         # swap dA and dAnew
         tmp = dA
         dA = dAnew
