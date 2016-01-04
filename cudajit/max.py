@@ -1,5 +1,6 @@
+from __future__ import print_function
 import numpy as np
-from numbapro import cuda, int32
+from numba import cuda, int32
 
 @cuda.jit('int32(int32, int32)', device=True, inline=True)
 def mymax(a, b):
@@ -45,8 +46,8 @@ max_kernel[griddim, blockdim](d_a, d_b)
 
 d_b.to_host()
 
-print 'a =', a
-print 'b =', b
-print 'np.max(b) =', np.max(b)
+print('a =', a)
+print('b =', b)
+print('np.max(b) =', np.max(b))
 assert np.max(b) == np.max(a)
 

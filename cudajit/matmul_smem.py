@@ -1,4 +1,4 @@
-from numbapro import cuda
+from __future__ import print_function
 from numba import *
 import numpy as np
 import math
@@ -44,7 +44,7 @@ A = np.array(np.random.random((n, n)), dtype=np.float32)
 B = np.array(np.random.random((n, n)), dtype=np.float32)
 C = np.empty_like(A)
 
-print "N = %d x %d" % (n, n)
+print("N = %d x %d" % (n, n))
 
 s = time()
 stream = cuda.stream()
@@ -67,9 +67,9 @@ Cans = Amat * Bmat
 e = time()
 tcpu = e - s
 
-print 'cpu:  %f' % tcpu
-print 'cuda: %f' % tcuda
-print 'cuda speedup: %.2fx' % (tcpu / tcuda)
+print('cpu:  %f' % tcpu)
+print('cuda: %f' % tcuda)
+print('cuda speedup: %.2fx' % (tcpu / tcuda))
 
 # Check result
 assert np.allclose(C, Cans)
