@@ -3,16 +3,19 @@ Speed on OS X 10.8 650M 1024GB GPU: 186s
 '''
 
 from __future__ import print_function, division
-import numpy as np
+
 import time
-from numba import *
+
+import numpy as np
+
+from numba import cuda, f8
 
 
 # NOTE: CUDA kernel does not return any value
 
-@cuda.jit(argtypes=[f8[:,:], f8[:,:], f8[:,:]])
+@cuda.jit("void(f8[:,:], f8[:,:], f8[:,:])")
 def jocabi_relax_core(A, Anew, error):
-    smem = cuda.shared.array(shape=(32 + 2, 32 + 2), dtype=f4)
+    smem = cuda.shared.array(shape=(32 + 2, 32 + 2), dtype=f8)
     n = A.shape[0]
     m = A.shape[1]
 

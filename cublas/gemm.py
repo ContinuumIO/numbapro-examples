@@ -5,12 +5,17 @@ Please refer to the documentation for details of how to use the gemm routine
 
 Note: cuBLAS uses Fortran layout
 '''
+from __future__ import print_function
 
-from accelerate.cuda.blas import Blas
-import numpy as np
 from timeit import default_timer as timer
 
+import numpy as np
+
+from accelerate.cuda.blas import Blas
+
+
 N = 128     # no. of rows/cols
+
 
 def gemm_v1():
     '''
@@ -77,6 +82,7 @@ def gemm_v2():
 def main():
     gemm_v1()
     gemm_v2()
+
 
 if __name__ == '__main__':
    main()

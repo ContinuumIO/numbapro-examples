@@ -7,9 +7,13 @@ completed.
 '''
 
 from __future__ import print_function
+
 from timeit import default_timer as timer
-from numba import cuda
+
 import numpy as np
+
+from numba import cuda
+
 
 @cuda.jit('void(float32[:], float32[:])')
 def cu_copy_array(dst, src):

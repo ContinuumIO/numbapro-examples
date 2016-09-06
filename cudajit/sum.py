@@ -1,9 +1,13 @@
 from __future__ import print_function
+
 import numpy as np
-from numba import *
+
+from numba import cuda
+
 from timeit import default_timer as time
 
-@cuda.jit(argtypes=[f4[:], f4[:], f4[:]])
+
+@cuda.jit("(float32[:], float32[:], float32[:])")
 def cuda_sum(a, b, c):
     i = cuda.grid(1)
     c[i] = a[i] + b[i]

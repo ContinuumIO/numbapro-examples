@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-#from __future__ import print_function, division, absolute_import
-import sys
-from numba import vectorize
-import numpy as np
+from __future__ import print_function, division, absolute_import
+
 from timeit import default_timer as timer
+
+import numpy as np
 from pylab import imshow, jet, show, ion
+
+from numba import vectorize
+
 
 sig = 'uint8(uint32, f8, f8, f8, f8, uint32, uint32, uint32)'
 

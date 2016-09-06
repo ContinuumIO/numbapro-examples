@@ -6,7 +6,7 @@ Usage:
 Run without argument will use builtin Lena image:
 
     python fftsimple.py
-    
+
 Or, specify an image to use
 
     python fftsimple.py myimage.jpg
@@ -18,30 +18,36 @@ Or, specify an image to use
 For Conda user, run the following to ensure the dependencies are fulfilled:
 
     conda install scipy matplotlib
-    
+
 You may need to install PIL from pip.
 
     conda install pip
     pip install PIL
 
 '''
+from __future__ import print_function
 
 import sys
+from timeit import default_timer as timer
+
 import numpy as np
 from scipy.signal import fftconvolve
 from scipy import misc, ndimage
 from matplotlib import pyplot as plt
+
 from accelerate.cuda.fft import FFTPlan, fft_inplace, ifft_inplace
 from numba import cuda, vectorize
-from timeit import default_timer as timer
+
 
 @vectorize(['complex64(complex64, complex64)'], target='cuda')
 def vmult(a, b):
     return a * b
 
+
 def best_grid_size(size, tpb):
     bpg = np.ceil(np.array(size, dtype=np.float) / tpb).astype(np.int).tolist()
     return tuple(bpg)
+
 
 def main():
     # Build Filter
@@ -60,7 +66,7 @@ def main():
         filename = sys.argv[1]
         image = ndimage.imread(filename, flatten=True).astype(np.float32)
     except IndexError:
-        image = misc.lena().astype(np.float32)
+        image = misc.face(gray=True).astype(np.float32)
 
     print("Image size: %s" % (image.shape,))
 

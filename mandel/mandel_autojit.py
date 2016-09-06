@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import
-from numba import jit
+
 from timeit import default_timer as timer
+
 import numpy as np
 from pylab import imshow, jet, show, ion
+
+from numba import jit
+
 
 @jit
 def mandel(x, y, max_iters):
@@ -13,11 +17,11 @@ def mandel(x, y, max_iters):
     set given a fixed number of iterations.
     """
     i = 0
-    c = complex(x,y)
+    c = complex(x, y)
     z = 0.0j
     for i in range(max_iters):
         z = z*z + c
-        if (z.real*z.real + z.imag*z.imag) >= 4:
+        if (z.real * z.real + z.imag * z.imag) >= 4:
             return i
 
     return max_iters

@@ -1,8 +1,12 @@
-import numpy as np
+from __future__ import print_function
+
 import math
+
+import numpy as np
 
 from numba import cuda, vectorize
 from accelerate.cuda.rand import PRNG
+
 
 @vectorize(['f8(f8, f8, f8, f8, f8)'], target='cuda')
 def step(last, dt, c0, c1, noise):
@@ -19,7 +23,7 @@ def monte_carlo_pricer(paths, dt, interest, volatility):
 
     # Allocate device side array
     d_normdist = cuda.device_array(n, dtype=np.double)
-    
+
     c0 = interest - 0.5 * volatility ** 2
     c1 = volatility * math.sqrt(dt)
 

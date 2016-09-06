@@ -1,6 +1,10 @@
-import numpy as np
+from __future__ import print_function
+
 import math
 import sys
+
+import numpy as np
+
 from numba import vectorize
 
 if sys.version_info[0] == 2:

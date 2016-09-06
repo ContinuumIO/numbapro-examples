@@ -1,10 +1,13 @@
 #! /usr/bin/env python
+from __future__ import print_function
+
+import math
 
 import numpy as np
-import math
 
 from numba import cuda, jit
 from accelerate.cuda.rand import PRNG
+
 from cuda_helper import MM
 
 
@@ -30,14 +33,14 @@ def monte_carlo_pricer(paths, dt, interest, volatility):
 
     # Allocate device side array
     d_normdist = cuda.device_array(n, dtype=np.double, stream=stream)
-    
+
     c0 = interest - 0.5 * volatility ** 2
     c1 = volatility * math.sqrt(dt)
 
     # Configure the kernel
     # Similar to CUDA-C: cu_monte_carlo_pricer<<<gridsz, blksz, 0, stream>>>
     step_cfg = step[gridsz, blksz, stream]
-    
+
     d_last = cuda.to_device(paths[:, 0], to=mm.get())
     for j in range(1, paths.shape[1]):
         prng.normal(d_normdist, mean=0, sigma=1)

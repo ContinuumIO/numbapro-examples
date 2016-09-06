@@ -2,21 +2,24 @@
 Speed on OS X 10.8 650M 1024GB GPU: 186s
 '''
 from __future__ import print_function, division
-import numpy as np
+
 import time
-from numba import *
+
+import numpy as np
+
+from numba import cuda, f8
 
 
 # NOTE: CUDA kernel does not return any value
 
 tpb = 16
 
-@cuda.jit(f8(f8, f8), device=True, inline=True)
+@cuda.jit(device=True, inline=True)
 def get_max(a, b):
     if a > b : return a
     else: return b
 
-@cuda.jit(void(f8[:,:], f8[:,:], f8[:,:]))
+@cuda.jit("void(f8[:,:], f8[:,:], f8[:,:])")
 def jocabi_relax_core(A, Anew, error):
     err_sm = cuda.shared.array((tpb, tpb), dtype=f8)
 

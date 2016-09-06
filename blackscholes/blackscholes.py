@@ -1,6 +1,8 @@
-import numpy as np
+from __future__ import print_function
+
 import time
 
+import numpy as np
 
 RISKFREE = 0.02
 VOLATILITY = 0.30
@@ -54,7 +56,7 @@ def main (*args):
     iterations = 10
     if len(args) >= 2:
         iterations = int(args[0])
-    
+
     callResult = np.zeros(OPT_N)
     putResult = -np.ones(OPT_N)
     stockPrice = randfloat(np.random.random(OPT_N), 5.0, 30.0)

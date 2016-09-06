@@ -4,8 +4,11 @@ See Numpy documentation for detail about gufunc:
     http://docs.scipy.org/doc/numpy/reference/c-api.generalized-ufuncs.html
 '''
 from __future__ import print_function
-import numpy as np
+
 import sys
+
+import numpy as np
+
 from numba import guvectorize, cuda
 
 if sys.version_info[0] == 2:

@@ -3,9 +3,12 @@ Speed on OS X 10.8 650M 1024GB GPU: 186s
 '''
 
 from __future__ import print_function, division
-import numpy as np
+
 import time
-from numba import *
+
+import numpy as np
+
+from numba import cuda
 
 
 # NOTE: CUDA kernel does not return any value

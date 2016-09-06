@@ -3,12 +3,16 @@ Demonstrate the significant performance difference between transferring
 regular host memory and pinned (pagelocked) host memory.
 '''
 from __future__ import print_function
+
 from timeit import default_timer as timer
+
 import numpy as np
+
 from numba import vectorize, float32, cuda
 
 src = np.arange(10 ** 7, dtype=np.float32)
 dst = np.empty_like(src)
+
 
 @vectorize([float32(float32)], target='cuda')
 def copy_kernel(src):

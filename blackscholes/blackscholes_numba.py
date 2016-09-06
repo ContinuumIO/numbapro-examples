@@ -1,9 +1,13 @@
-import numpy as np
+from __future__ import print_function
+
 import math
 import time
-from numba import *
+
+import numpy as np
+
+
+from numba import jit
 from blackscholes import black_scholes
-#import logging; logging.getLogger().setLevel(logging.WARNING)
 
 
 RISKFREE = 0.02

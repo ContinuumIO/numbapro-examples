@@ -2,12 +2,16 @@
 """
 This version demonstrates copy-compute overlapping through multiple streams.
 """
+from __future__ import print_function
 
-import numpy as np
 import math
 import sys
+
+import numpy as np
+
 from numba import cuda, jit
 from accelerate.cuda.rand import PRNG
+
 from cuda_helper import MM
 
 if sys.version_info[0] == 2:
@@ -25,7 +29,7 @@ def cu_step(last, paths, dt, c0, c1, normdist):
 def monte_carlo_pricer(paths, dt, interest, volatility):
     n = paths.shape[0]
     num_streams = 2
-    
+
     part_width = int(math.ceil(float(n) / num_streams))
     partitions = [(0, part_width)]
     for i in range(1, num_streams):

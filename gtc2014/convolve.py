@@ -113,7 +113,7 @@ def get_image():
         filename = sys.argv[1]
         image = ndimage.imread(filename, flatten=True).astype(np.float32)
     except IndexError:
-        image = misc.lena().astype(np.float32)
+        image = misc.face(gray=True).astype(np.float32)
     return image
 
 def main():

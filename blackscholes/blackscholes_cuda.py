@@ -1,9 +1,12 @@
-import numpy as np
+from __future__ import print_function
+
 import math
 import time
-from numba import *
+
+import numpy as np
+
+from numba import cuda
 from blackscholes_numba import black_scholes, black_scholes_numba
-#import logging; logging.getLogger().setLevel(0)
 
 
 RISKFREE = 0.02
@@ -17,7 +20,8 @@ A4 = -1.821255978
 A5 = 1.330274429
 RSQRT2PI = 0.39894228040143267793994605993438
 
-@cuda.jit(argtypes=(double,), restype=double, device=True, inline=True)
+
+@cuda.jit(device=True)
 def cnd_cuda(d):
     K = 1.0 / (1.0 + 0.2316419 * math.fabs(d))
     ret_val = (RSQRT2PI * math.exp(-0.5 * d * d) *
@@ -27,15 +31,14 @@ def cnd_cuda(d):
     return ret_val
 
 
-@cuda.jit(argtypes=(double[:], double[:], double[:], double[:], double[:],
-                    double, double))
+@cuda.jit
 def black_scholes_cuda(callResult, putResult, S, X,
                        T, R, V):
-#    S = stockPrice
-#    X = optionStrike
-#    T = optionYears
-#    R = Riskfree
-#    V = Volatility
+    #    S = stockPrice
+    #    X = optionStrike
+    #    T = optionYears
+    #    R = Riskfree
+    #    V = Volatility
     i = cuda.threadIdx.x + cuda.blockIdx.x * cuda.blockDim.x
     if i >= S.shape[0]:
         return
@@ -88,7 +91,7 @@ def main (*args):
 
     time0 = time.time()
     blockdim = 1024, 1
-    griddim = int(math.ceil(float(OPT_N)/blockdim[0])), 1
+    griddim = int(math.ceil(float(OPT_N) / blockdim[0])), 1
     stream = cuda.stream()
     d_callResult = cuda.to_device(callResultCuda, stream)
     d_putResult = cuda.to_device(putResultCuda, stream)
@@ -100,9 +103,9 @@ def main (*args):
         black_scholes_cuda[griddim, blockdim, stream](
             d_callResult, d_putResult, d_stockPrice, d_optionStrike,
             d_optionYears, RISKFREE, VOLATILITY)
-        d_callResult.to_host(stream)
-        d_putResult.to_host(stream)
-        stream.synchronize()
+    d_callResult.copy_to_host(callResultCuda, stream)
+    d_putResult.copy_to_host(putResultCuda, stream)
+    stream.synchronize()
     time2 = time.time()
     dt = (time1 - time0) * 10 + (time2 - time1)
     print("numba.cuda time: %f msec" % ((1000 * dt) / iterations))

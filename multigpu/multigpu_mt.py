@@ -1,7 +1,10 @@
 from __future__ import print_function
-import numpy as np
-from math import ceil
+
 import threading
+from math import ceil
+
+import numpy as np
+
 from numba import cuda
 
 print('System has %d CUDA devices' % len(cuda.list_devices()))
@@ -26,7 +29,7 @@ def device_controller(cid):
     # print some information about the CUDA card
     prefix = '[%s]' % device
     print(prefix, 'device_controller', cid, '| CC', device.COMPUTE_CAPABILITY)
-    
+
     max_thread = device.MAX_THREADS_PER_BLOCK
 
     with compiler_lock:                        # lock the compiler

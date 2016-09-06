@@ -6,7 +6,7 @@ Usage:
 Run without argument will use builtin Lena image:
 
     python fftconvolve.py
-    
+
 Or, specify an image to use
 
     python fftconvolve.py myimage.jpg
@@ -18,22 +18,26 @@ Or, specify an image to use
 For Conda user, run the following to ensure the dependencies are fulfilled:
 
     conda install scipy matplotlib
-    
+
 You may need to install PIL from pip.
 
     conda install pip
     pip install PIL
 
 '''
+from __future__ import print_function
 
 import sys
+from timeit import default_timer as timer
+
 import numpy as np
 from scipy.signal import fftconvolve
 from scipy import misc, ndimage
 from matplotlib import pyplot as plt
+
 from accelerate.cuda.fft import FFTPlan
 from numba import cuda
-from timeit import default_timer as timer
+
 
 @cuda.jit('void(complex64[:,:], complex64[:,:])')
 def mult_inplace(img, resp):
@@ -41,9 +45,11 @@ def mult_inplace(img, resp):
     if j < img.shape[0] and i < img.shape[1]:
         img[j, i] *= resp[j, i]
 
+
 def best_grid_size(size, tpb):
     bpg = np.ceil(np.array(size, dtype=np.float) / tpb).astype(np.int).tolist()
     return tuple(bpg)
+
 
 def main():
     # Build Filter
@@ -62,7 +68,7 @@ def main():
         filename = sys.argv[1]
         image = ndimage.imread(filename, flatten=True).astype(np.float32)
     except IndexError:
-        image = misc.lena().astype(np.float32)
+        image = misc.face(gray=True).astype(np.float32)
 
     print("Image size: %s" % (image.shape,))
 
@@ -94,9 +100,9 @@ def main():
     stream2 = cuda.stream()
 
     fftplan1 = FFTPlan(shape=image.shape, itype=np.complex64,
-                            otype=np.complex64, stream=stream1)
+                       otype=np.complex64, stream=stream1)
     fftplan2 = FFTPlan(shape=image.shape, itype=np.complex64,
-                        otype=np.complex64, stream=stream2)
+                       otype=np.complex64, stream=stream2)
 
     # pagelock memory
     with cuda.pinned(image_complex, response_complex):
@@ -108,7 +114,7 @@ def main():
 
         fftplan1.forward(d_image_complex, out=d_image_complex)
         fftplan2.forward(d_response_complex, out=d_response_complex)
-        
+
         stream2.synchronize()
 
         mult_inplace[blockpergrid, threadperblock, stream1](d_image_complex,

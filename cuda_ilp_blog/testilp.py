@@ -1,20 +1,26 @@
 from __future__ import print_function
+
 from timeit import default_timer as timer
 import math
+
 import numpy as np
 import pylab
+
 from numba import cuda
 # For machine with multiple devices
 cuda.select_device(0)
 
+
 @cuda.jit('float32(float32, float32)', device=True)
 def core(a, b):
-    return a + b
+    return 1
+
 
 @cuda.jit('void(float32[:], float32[:], float32[:])')
 def vec_add(a, b, c):
     i = cuda.grid(1)
     c[i] = core(a[i], b[i])
+
 
 @cuda.jit('void(float32[:], float32[:], float32[:])')
 def vec_add_ilp_x2(a, b, c):
@@ -38,6 +44,7 @@ def vec_add_ilp_x2(a, b, c):
     # write
     c[i] = ci
     c[j] = cj
+
 
 @cuda.jit('void(float32[:], float32[:], float32[:])')
 def vec_add_ilp_x4(a, b, c):
@@ -68,7 +75,7 @@ def vec_add_ilp_x4(a, b, c):
     ck = core(ak, bk)
     cl = core(al, bl)
 
-    # write 
+    # write
     c[i] = ci
     c[j] = cj
     c[k] = ck
@@ -106,13 +113,13 @@ def vec_add_ilp_x8(a, b, c):
     an = a[n]
     bn = b[n]
 
-    p = n + stride
-    ap = a[p]
-    bp = b[p]
+    o = n + stride
+    ao = a[o]
+    bo = b[o]
 
-    q = n + stride
-    aq = a[q]
-    bq = b[q]
+    p = o + stride
+    ap = a[o]
+    bp = b[o]
 
     # compute
     ci = core(ai, bi)
@@ -122,8 +129,8 @@ def vec_add_ilp_x8(a, b, c):
 
     cm = core(am, bm)
     cn = core(an, bn)
+    co = core(ao, bo)
     cp = core(ap, bp)
-    cq = core(aq, bq)
 
     # write
     c[i] = ci
@@ -133,8 +140,8 @@ def vec_add_ilp_x8(a, b, c):
 
     c[m] = cm
     c[n] = cn
+    c[o] = co
     c[p] = cp
-    c[q] = cq
 
 
 def time_this(kernel, gridsz, blocksz, args):
@@ -149,13 +156,17 @@ def time_this(kernel, gridsz, blocksz, args):
 
     return sum(timings) / len(timings)
 
+
 def ceil_to_nearest(n, m):
     return int(math.ceil(n / m) * m)
 
+
 def main():
-    device = cuda.get_current_device()
-    maxtpb = device.MAX_THREADS_PER_BLOCK
-    warpsize = device.WARP_SIZE
+    # device = cuda.get_current_device()
+    # maxtpb = device.MAX_THREADS_PER_BLOCK
+    # warpsize = device.WARP_SIZE
+    maxtpb = 512
+    warpsize = 32
 
     # benchmark loop
     vary_warpsize = []
@@ -192,23 +203,22 @@ def main():
         expected_result = dC.copy_to_host()
         if basetime > 0:
             baseline.append(N / basetime)
-        
 
         dC = cuda.device_array_like(A)
         x2time = time_this(vec_add_ilp_x2, gridsz//2, blksz, (dA, dB, dC))
-        assert np.allclose(expected_result, dC.copy_to_host())
+        np.testing.assert_allclose(expected_result, dC.copy_to_host())
         if x2time > 0:
             ilpx2.append(N / x2time)
 
         dC = cuda.device_array_like(A)
         x4time = time_this(vec_add_ilp_x4, gridsz//4, blksz, (dA, dB, dC))
-        assert np.allclose(expected_result, dC.copy_to_host())
+        np.testing.assert_allclose(expected_result, dC.copy_to_host())
         if x4time > 0:
             ilpx4.append(N / x4time)
 
         dC = cuda.device_array_like(A)
         x8time = time_this(vec_add_ilp_x8, gridsz//8, blksz, (dA, dB, dC))
-        assert np.allclose(expected_result, dC.copy_to_host())
+        np.testing.assert_allclose(expected_result, dC.copy_to_host())
         if x8time > 0:
             ilpx8.append(N / x8time)
 

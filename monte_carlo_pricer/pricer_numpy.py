@@ -1,7 +1,11 @@
-import numpy as np
+from __future__ import print_function
+
 import sys
 from math import sqrt, exp
 from timeit import default_timer as timer
+
+import numpy as np
+
 
 if sys.version_info[0] == 2:
     range = xrange

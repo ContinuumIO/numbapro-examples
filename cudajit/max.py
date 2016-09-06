@@ -1,6 +1,9 @@
 from __future__ import print_function
+
 import numpy as np
+
 from numba import cuda, int32
+
 
 @cuda.jit('int32(int32, int32)', device=True, inline=True)
 def mymax(a, b):
@@ -8,6 +11,7 @@ def mymax(a, b):
         return a
     else:
         return b
+
 
 @cuda.jit('void(int32[:], int32[:])')
 def max_kernel(a, b):

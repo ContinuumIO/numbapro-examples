@@ -1,7 +1,10 @@
 from __future__ import print_function
-import numpy as np
+
 import time
-from numba import *
+
+import numpy as np
+
+from numba import jit
 
 
 @jit
